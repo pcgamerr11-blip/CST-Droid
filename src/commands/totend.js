@@ -26,11 +26,9 @@ function writeData(data) {
 async function runTotend(targetUser, guild, replyFn, ephemeralFn) {
   try {
     const member = await guild.members.fetch(targetUser.id);
-
     for (const roleId of TRIAL_ROLES) {
       await member.roles.remove(roleId).catch(() => {});
     }
-
     const data = readData();
     delete data[targetUser.id];
     writeData(data);
@@ -60,7 +58,10 @@ export default {
     const user = interaction.options.getUser('user');
     await runTotend(
       user, interaction.guild,
-      async (embed) => interaction.reply({ embeds: [embed] }),
+      async (embed) => {
+        await interaction.reply({ embeds: [embed] });
+        setTimeout(async () => { try { await interaction.deleteReply(); } catch {} }, 3000);
+      },
       async (msg) => interaction.reply({ content: msg, ephemeral: true })
     );
   },
@@ -74,7 +75,10 @@ export default {
     catch { return message.reply('Could not find that user.'); }
     await runTotend(
       targetUser, message.guild,
-      async (embed) => message.channel.send({ embeds: [embed] }),
+      async (embed) => {
+        const sent = await message.channel.send({ embeds: [embed] });
+        setTimeout(() => sent.delete().catch(() => {}), 3000);
+      },
       async (msg) => message.reply(msg)
     );
   }
