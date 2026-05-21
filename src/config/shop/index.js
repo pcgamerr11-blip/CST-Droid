@@ -1,6 +1,3 @@
-
-
-
 import { shopItems, getItemById, getItemsByType, getItemPrice, validatePurchase } from './items.js';
 import { botConfig } from '../bot.js';
 
