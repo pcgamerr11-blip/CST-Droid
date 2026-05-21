@@ -3,15 +3,17 @@ import fs from 'fs';
 
 const TRIAL_ROLE_ID = '1412457998877720646';
 const REMOVE_ROLE_ID = '1411742536837627925';
+const EXTRA_ROLES_ADD = [
+  '1502069854839246921',
+  '1411741603693072466',
+  '1411740378511573114'
+];
 const DATA_FILE = './trialData.json';
 
 function readData() {
   if (fs.existsSync(DATA_FILE)) {
-    try {
-      return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-    } catch {
-      return {};
-    }
+    try { return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); }
+    catch { return {}; }
   }
   return {};
 }
@@ -24,7 +26,13 @@ async function runTotadd(targetUser, days, guild, replyFn, ephemeralFn) {
   try {
     const member = await guild.members.fetch(targetUser.id);
 
+    // Add trial role + extra roles
     await member.roles.add(TRIAL_ROLE_ID);
+    for (const roleId of EXTRA_ROLES_ADD) {
+      await member.roles.add(roleId).catch(() => {});
+    }
+
+    // Remove the non-trial role
     await member.roles.remove(REMOVE_ROLE_ID).catch(() => {});
 
     const data = readData();
@@ -60,15 +68,11 @@ export default {
       opt.setName('days').setDescription('Number of days for the trial').setRequired(true).setMinValue(1)
     ),
 
-  // Slash command handler
   async execute(interaction) {
     const user = interaction.options.getUser('user');
     const days = interaction.options.getInteger('days');
-
     await runTotadd(
-      user,
-      days,
-      interaction.guild,
+      user, days, interaction.guild,
       async (embed) => {
         await interaction.reply({ embeds: [embed] });
         setTimeout(async () => { try { await interaction.deleteReply(); } catch {} }, 5000);
@@ -79,34 +83,21 @@ export default {
     );
   },
 
-  // Prefix command handler (-totadd @user 7)
   async prefixExecute(message, args) {
     const mention = args[0];
     const days = parseInt(args[1]);
-
-    if (!mention || isNaN(days) || days < 1) {
-      return message.reply('Usage: `-totadd @user <days>`');
-    }
-
+    if (!mention || isNaN(days) || days < 1) return message.reply('Usage: `-totadd @user <days>`');
     const userId = mention.replace(/[<@!>]/g, '');
     let targetUser;
-    try {
-      targetUser = await message.client.users.fetch(userId);
-    } catch {
-      return message.reply('Could not find that user.');
-    }
-
+    try { targetUser = await message.client.users.fetch(userId); }
+    catch { return message.reply('Could not find that user.'); }
     await runTotadd(
-      targetUser,
-      days,
-      message.guild,
+      targetUser, days, message.guild,
       async (embed) => {
         const sent = await message.channel.send({ embeds: [embed] });
         setTimeout(() => sent.delete().catch(() => {}), 5000);
       },
-      async (msg) => {
-        message.reply(msg);
-      }
+      async (msg) => message.reply(msg)
     );
   }
 };
