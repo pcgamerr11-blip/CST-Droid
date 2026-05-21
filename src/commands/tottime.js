@@ -6,7 +6,7 @@ import {
 
 export default {
   data: new SlashCommandBuilder()
-    .setName("gottime")
+    .setName("tottime")
     .setDescription("Check remaining Shock on Trial time")
     .addUserOption(option =>
       option
