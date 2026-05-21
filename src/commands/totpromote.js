@@ -9,24 +9,19 @@ const LEVEL_ROLES = {
 async function runTotpromote(targetUser, level, guild, replyFn, ephemeralFn) {
   try {
     const member = await guild.members.fetch(targetUser.id);
-
-    // Remove all other level roles
     for (const [lvl, roleId] of Object.entries(LEVEL_ROLES)) {
       if (parseInt(lvl) !== level) {
         await member.roles.remove(roleId).catch(() => {});
       }
     }
-
-    // Add the new level role
     await member.roles.add(LEVEL_ROLES[level]);
 
-    const levelLabels = { 1: 'Level 1', 2: 'Level 2', 3: 'Level 3' };
     const levelColors = { 1: 0x57F287, 2: 0x3498DB, 3: 0xEB459E };
 
     const embed = new EmbedBuilder()
       .setColor(levelColors[level])
       .setTitle('⬆️ Shock on Trial — Promoted')
-      .setDescription(`<@${targetUser.id}> has been promoted to **${levelLabels[level]}**.`)
+      .setDescription(`<@${targetUser.id}> has been promoted to **Level ${level}**.`)
       .setTimestamp();
 
     await replyFn(embed);
@@ -57,7 +52,10 @@ export default {
     const level = interaction.options.getInteger('level');
     await runTotpromote(
       user, level, interaction.guild,
-      async (embed) => interaction.reply({ embeds: [embed] }),
+      async (embed) => {
+        await interaction.reply({ embeds: [embed] });
+        setTimeout(async () => { try { await interaction.deleteReply(); } catch {} }, 3000);
+      },
       async (msg) => interaction.reply({ content: msg, ephemeral: true })
     );
   },
@@ -74,7 +72,10 @@ export default {
     catch { return message.reply('Could not find that user.'); }
     await runTotpromote(
       targetUser, level, message.guild,
-      async (embed) => message.channel.send({ embeds: [embed] }),
+      async (embed) => {
+        const sent = await message.channel.send({ embeds: [embed] });
+        setTimeout(() => sent.delete().catch(() => {}), 3000);
+      },
       async (msg) => message.reply(msg)
     );
   }
