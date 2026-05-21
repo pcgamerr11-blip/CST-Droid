@@ -2,7 +2,6 @@ import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import fs from 'fs';
 
 const DATA_FILE = './trialData.json';
-
 const TRIAL_ROLES = [
   '1412457998877720646',
   '1412458005416509480',
@@ -11,7 +10,6 @@ const TRIAL_ROLES = [
   '1411741603693072466',
   '1411740378511573114'
 ];
-
 const GRADUATE_ROLES = [
   '1411740378511573114',
   '1411742967634591825',
@@ -34,18 +32,12 @@ function writeData(data) {
 async function runTotgraduate(targetUser, guild, replyFn, ephemeralFn) {
   try {
     const member = await guild.members.fetch(targetUser.id);
-
-    // Remove all trial roles
     for (const roleId of TRIAL_ROLES) {
       await member.roles.remove(roleId).catch(() => {});
     }
-
-    // Add graduate roles
     for (const roleId of GRADUATE_ROLES) {
       await member.roles.add(roleId).catch(() => {});
     }
-
-    // Remove from trial data
     const data = readData();
     delete data[targetUser.id];
     writeData(data);
@@ -53,7 +45,7 @@ async function runTotgraduate(targetUser, guild, replyFn, ephemeralFn) {
     const embed = new EmbedBuilder()
       .setColor(0x57F287)
       .setTitle('🎓 Shock on Trial — Graduated!')
-      .setDescription(`<@${targetUser.id}> has successfully **graduated** from Shock on Trial! All trial roles have been removed and graduate roles have been assigned.`)
+      .setDescription(`<@${targetUser.id}> has successfully **graduated** from Shock on Trial!`)
       .setTimestamp();
 
     await replyFn(embed);
@@ -75,7 +67,10 @@ export default {
     const user = interaction.options.getUser('user');
     await runTotgraduate(
       user, interaction.guild,
-      async (embed) => interaction.reply({ embeds: [embed] }),
+      async (embed) => {
+        await interaction.reply({ embeds: [embed] });
+        setTimeout(async () => { try { await interaction.deleteReply(); } catch {} }, 3000);
+      },
       async (msg) => interaction.reply({ content: msg, ephemeral: true })
     );
   },
@@ -89,7 +84,10 @@ export default {
     catch { return message.reply('Could not find that user.'); }
     await runTotgraduate(
       targetUser, message.guild,
-      async (embed) => message.channel.send({ embeds: [embed] }),
+      async (embed) => {
+        const sent = await message.channel.send({ embeds: [embed] });
+        setTimeout(() => sent.delete().catch(() => {}), 3000);
+      },
       async (msg) => message.reply(msg)
     );
   }
