@@ -59,7 +59,10 @@ export default {
     const days = interaction.options.getInteger('days');
     await runTotextend(
       user, days,
-      async (embed) => interaction.reply({ embeds: [embed] }),
+      async (embed) => {
+        await interaction.reply({ embeds: [embed] });
+        setTimeout(async () => { try { await interaction.deleteReply(); } catch {} }, 3000);
+      },
       async (msg) => interaction.reply({ content: msg, ephemeral: true })
     );
   },
@@ -74,7 +77,10 @@ export default {
     catch { return message.reply('Could not find that user.'); }
     await runTotextend(
       targetUser, days,
-      async (embed) => message.channel.send({ embeds: [embed] }),
+      async (embed) => {
+        const sent = await message.channel.send({ embeds: [embed] });
+        setTimeout(() => sent.delete().catch(() => {}), 3000);
+      },
       async (msg) => message.reply(msg)
     );
   }
