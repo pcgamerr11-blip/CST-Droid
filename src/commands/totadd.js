@@ -37,7 +37,13 @@ export default {
         .setTitle('Trial Added')
         .setDescription(`${user.tag} added for ${days} days`);
 
-      await interaction.reply({ embeds: [embed] });
+await interaction.reply({ embeds: [embed] });
+
+setTimeout(async () => {
+  try {
+    await interaction.deleteReply();
+  } catch {}
+}, 3000);
 
     } catch (err) {
       console.error(err);
