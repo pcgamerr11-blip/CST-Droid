@@ -19,8 +19,8 @@ export const botConfig = {
     // 0 = Playing
     // 1 = Streaming
     // 2 = Listening
-    // 3 = Watching
-    // 4 = Custom
+    // 3 = WatchingA
+    // 4 = CustomA
     // 5 = Competing
     activities: [
       {
@@ -436,30 +436,30 @@ export const botConfig = {
   // Set any feature to `false` to disable it globally.
   features: {
     // Core systems.
-    economy: true,
-    leveling: true,
-    moderation: true,
-    logging: true,
-    welcome: true,
+    economy: false,
+    leveling: false,
+    moderation: false,
+    logging: false,
+    welcome: false,
 
     // Community engagement systems.
-    tickets: true,
-    giveaways: true,
+    tickets: false,
+    giveaways: false,
     birthday: true,
-    counter: true,
+    counter: false,
 
     // Security and self-service systems.
-    verification: true,
-    reactionRoles: true,
-    joinToCreate: true,
+    verification: false,
+    reactionRoles: false,
+    joinToCreate: false,
 
     // Utility/quality-of-life modules.
-    voice: true,
-    search: true,
-    tools: true,
-    utility: true,
-    community: true,
-    fun: true,
+    voice: false,
+    search: false,
+    tools: false,
+    utility: false,
+    community: false,
+    fun: false,
   },
 };
 
