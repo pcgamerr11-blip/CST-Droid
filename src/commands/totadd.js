@@ -1,59 +1,40 @@
 import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
-import fs from 'fs';
 
+const ALLOWED_ROLES = ['1411740361113735400','1506828742335402154','1411743505780441128','1506828797037645935'];
 const TRIAL_ROLE_ID = '1412457998877720646';
 const REMOVE_ROLE_ID = '1411742536837627925';
-const EXTRA_ROLES_ADD = [
-  '1502069854839246921',
-  '1411741603693072466',
-  '1411740378511573114'
-];
-const DATA_FILE = './trialData.json';
+const EXTRA_ROLES = ['1502069854839246921','1411741603693072466','1411740378511573114'];
 
-function readData() {
-  if (fs.existsSync(DATA_FILE)) {
-    try { return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8')); }
-    catch { return {}; }
-  }
-  return {};
+function hasPermission(member) {
+  if (member.permissions.has('Administrator')) return true;
+  return ALLOWED_ROLES.some(id => member.roles.cache.has(id));
 }
 
-function writeData(data) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+function trialKey(guildId, userId) {
+  return `guild:${guildId}:trial:${userId}`;
 }
 
-async function runTotadd(targetUser, days, guild, replyFn, ephemeralFn) {
+async function run(targetUser, days, guild, client, replyFn, ephemeralFn) {
   try {
     const member = await guild.members.fetch(targetUser.id);
-
-    // Add trial role + extra roles
     await member.roles.add(TRIAL_ROLE_ID);
-    for (const roleId of EXTRA_ROLES_ADD) {
-      await member.roles.add(roleId).catch(() => {});
-    }
-
-    // Remove the non-trial role
+    for (const id of EXTRA_ROLES) await member.roles.add(id).catch(() => {});
     await member.roles.remove(REMOVE_ROLE_ID).catch(() => {});
-
-    const data = readData();
-    data[targetUser.id] = {
+    await client.db.set(trialKey(guild.id, targetUser.id), {
       endTime: Date.now() + days * 86400000,
       startedAt: Date.now(),
       days
-    };
-    writeData(data);
-
+    });
     const embed = new EmbedBuilder()
       .setColor(0x57F287)
       .setTitle('⚠️ Shock on Trial — Started')
       .setDescription(`<@${targetUser.id}> has been placed on **Shock on Trial** for **${days} day${days !== 1 ? 's' : ''}**.`)
       .addFields({ name: 'Time Limit', value: `${days} day${days !== 1 ? 's' : ''}`, inline: true })
       .setTimestamp();
-
     await replyFn(embed);
   } catch (err) {
     console.error('[totadd error]', err);
-    await ephemeralFn('Error running totadd. Make sure the bot has the Manage Roles permission and the role IDs are correct.');
+    await ephemeralFn('Error running totadd. Check bot permissions and role hierarchy.');
   }
 }
 
@@ -61,42 +42,30 @@ export default {
   data: new SlashCommandBuilder()
     .setName('totadd')
     .setDescription('Place a user on Shock on Trial')
-    .addUserOption(opt =>
-      opt.setName('user').setDescription('The user to put on trial').setRequired(true)
-    )
-    .addIntegerOption(opt =>
-      opt.setName('days').setDescription('Number of days for the trial').setRequired(true).setMinValue(1)
-    ),
+    .addUserOption(opt => opt.setName('user').setDescription('User').setRequired(true))
+    .addIntegerOption(opt => opt.setName('days').setDescription('Days').setRequired(true).setMinValue(1)),
 
   async execute(interaction) {
+    if (!hasPermission(interaction.member))
+      return interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
     const user = interaction.options.getUser('user');
     const days = interaction.options.getInteger('days');
-    await runTotadd(
-      user, days, interaction.guild,
-      async (embed) => {
-        await interaction.reply({ embeds: [embed] });
-        setTimeout(async () => { try { await interaction.deleteReply(); } catch {} }, 5000);
-      },
-      async (msg) => {
-        if (!interaction.replied) await interaction.reply({ content: msg, ephemeral: true });
-      }
+    await run(user, days, interaction.guild, interaction.client,
+      async (embed) => { await interaction.reply({ embeds: [embed] }); setTimeout(async () => { try { await interaction.deleteReply(); } catch {} }, 3000); },
+      async (msg) => { if (!interaction.replied) await interaction.reply({ content: msg, ephemeral: true }); }
     );
   },
 
   async prefixExecute(message, args) {
-    const mention = args[0];
-    const days = parseInt(args[1]);
+    const member = await message.guild.members.fetch(message.author.id);
+    if (!hasPermission(member)) return message.reply('You do not have permission to use this command.');
+    const mention = args[0]; const days = parseInt(args[1]);
     if (!mention || isNaN(days) || days < 1) return message.reply('Usage: `-totadd @user <days>`');
     const userId = mention.replace(/[<@!>]/g, '');
     let targetUser;
-    try { targetUser = await message.client.users.fetch(userId); }
-    catch { return message.reply('Could not find that user.'); }
-    await runTotadd(
-      targetUser, days, message.guild,
-      async (embed) => {
-        const sent = await message.channel.send({ embeds: [embed] });
-        setTimeout(() => sent.delete().catch(() => {}), 5000);
-      },
+    try { targetUser = await message.client.users.fetch(userId); } catch { return message.reply('Could not find that user.'); }
+    await run(targetUser, days, message.guild, message.client,
+      async (embed) => { const s = await message.channel.send({ embeds: [embed] }); setTimeout(() => s.delete().catch(() => {}), 3000); },
       async (msg) => message.reply(msg)
     );
   }
