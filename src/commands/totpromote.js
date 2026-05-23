@@ -2,6 +2,7 @@ import { SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 
 const ALLOWED_ROLES = ['1411740361113735400','1506828742335402154','1411743505780441128','1506828797037645935'];
 const LEVEL_ROLES = { 1: '1412457998877720646', 2: '1412458005416509480', 3: '1412458004388909196' };
+const LOG_CHANNEL_ID = '1507177727860412567';
 
 function hasPermission(member) {
   if (member.permissions.has('Administrator')) return true;
@@ -12,7 +13,28 @@ function trialKey(guildId, userId) {
   return `guild:${guildId}:trial:${userId}`;
 }
 
-async function run(targetUser, level, guild, client, replyFn, ephemeralFn) {
+async function sendLog(guild, executor, target, level) {
+  try {
+    const channel = await guild.channels.fetch(LOG_CHANNEL_ID);
+    if (!channel) return;
+    await channel.send({ embeds: [
+      new EmbedBuilder()
+        .setColor(0x3498DB)
+        .setTitle('📋 Command Log — totpromote')
+        .addFields(
+          { name: 'Executor', value: `<@${executor.id}> (${executor.tag})`, inline: true },
+          { name: 'Target', value: `<@${target.id}> (${target.tag})`, inline: true },
+          { name: 'Action', value: `Promoted to **Level ${level}**`, inline: false },
+          { name: 'Time', value: `<t:${Math.floor(Date.now() / 1000)}:F>`, inline: false }
+        )
+        .setTimestamp()
+    ]});
+  } catch (err) {
+    console.error('[totpromote log error]', err);
+  }
+}
+
+async function run(targetUser, level, guild, client, executor, replyFn, ephemeralFn) {
   try {
     const entry = await client.db.get(trialKey(guild.id, targetUser.id), null);
     if (!entry) return ephemeralFn(`<@${targetUser.id}> is not currently on Shock on Trial.`);
@@ -21,6 +43,7 @@ async function run(targetUser, level, guild, client, replyFn, ephemeralFn) {
       if (parseInt(lvl) !== level) await member.roles.remove(id).catch(() => {});
     }
     await member.roles.add(LEVEL_ROLES[level]);
+    await sendLog(guild, executor, targetUser, level);
     const colors = { 1: 0x57F287, 2: 0x3498DB, 3: 0xEB459E };
     await replyFn(new EmbedBuilder()
       .setColor(colors[level]).setTitle('⬆️ Shock on Trial — Promoted')
@@ -45,7 +68,7 @@ export default {
       return interaction.reply({ content: 'You do not have permission to use this command.', ephemeral: true });
     const user = interaction.options.getUser('user');
     const level = interaction.options.getInteger('level');
-    await run(user, level, interaction.guild, interaction.client,
+    await run(user, level, interaction.guild, interaction.client, interaction.user,
       async (embed) => { await interaction.reply({ embeds: [embed] }); setTimeout(async () => { try { await interaction.deleteReply(); } catch {} }, 3000); },
       async (msg) => interaction.reply({ content: msg, ephemeral: true })
     );
@@ -59,7 +82,7 @@ export default {
     const userId = mention.replace(/[<@!>]/g, '');
     let targetUser;
     try { targetUser = await message.client.users.fetch(userId); } catch { return message.reply('Could not find that user.'); }
-    await run(targetUser, level, message.guild, message.client,
+    await run(targetUser, level, message.guild, message.client, message.author,
       async (embed) => { const s = await message.channel.send({ embeds: [embed] }); setTimeout(() => s.delete().catch(() => {}), 3000); },
       async (msg) => message.reply(msg)
     );
