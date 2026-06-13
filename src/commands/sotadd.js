@@ -22,7 +22,7 @@ async function sendLog(guild, executor, target, days) {
     await channel.send({ embeds: [
       new EmbedBuilder()
         .setColor(0x57F287)
-        .setTitle('📋 Command Log — totadd')
+        .setTitle('📋 Command Log — sotadd')
         .addFields(
           { name: 'Executor', value: `<@${executor.id}> (${executor.tag})`, inline: true },
           { name: 'Target', value: `<@${target.id}> (${target.tag})`, inline: true },
@@ -32,7 +32,7 @@ async function sendLog(guild, executor, target, days) {
         .setTimestamp()
     ]});
   } catch (err) {
-    console.error('[totadd log error]', err);
+    console.error('[sotadd log error]', err);
   }
 }
 
@@ -56,14 +56,14 @@ async function run(targetUser, days, guild, client, executor, replyFn, ephemeral
       .setTimestamp();
     await replyFn(embed);
   } catch (err) {
-    console.error('[totadd error]', err);
-    await ephemeralFn('Error running totadd. Check bot permissions and role hierarchy.');
+    console.error('[sotadd error]', err);
+    await ephemeralFn('Error running sotadd. Check bot permissions and role hierarchy.');
   }
 }
 
 export default {
   data: new SlashCommandBuilder()
-    .setName('totadd')
+    .setName('sotadd')
     .setDescription('Place a user on Shock on Trial')
     .addUserOption(opt => opt.setName('user').setDescription('User').setRequired(true))
     .addIntegerOption(opt => opt.setName('days').setDescription('Days').setRequired(true).setMinValue(1)),
@@ -83,7 +83,7 @@ export default {
     const member = await message.guild.members.fetch(message.author.id);
     if (!hasPermission(member)) return message.reply('You do not have permission to use this command.');
     const mention = args[0]; const days = parseInt(args[1]);
-    if (!mention || isNaN(days) || days < 1) return message.reply('Usage: `-totadd @user <days>`');
+    if (!mention || isNaN(days) || days < 1) return message.reply('Usage: `-sotadd @user <days>`');
     const userId = mention.replace(/[<@!>]/g, '');
     let targetUser;
     try { targetUser = await message.client.users.fetch(userId); } catch { return message.reply('Could not find that user.'); }
