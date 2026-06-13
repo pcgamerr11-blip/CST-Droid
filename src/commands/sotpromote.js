@@ -20,7 +20,7 @@ async function sendLog(guild, executor, target, level) {
     await channel.send({ embeds: [
       new EmbedBuilder()
         .setColor(0x3498DB)
-        .setTitle('📋 Command Log — totpromote')
+        .setTitle('📋 Command Log — sotpromote')
         .addFields(
           { name: 'Executor', value: `<@${executor.id}> (${executor.tag})`, inline: true },
           { name: 'Target', value: `<@${target.id}> (${target.tag})`, inline: true },
@@ -30,7 +30,7 @@ async function sendLog(guild, executor, target, level) {
         .setTimestamp()
     ]});
   } catch (err) {
-    console.error('[totpromote log error]', err);
+    console.error('[sotpromote log error]', err);
   }
 }
 
@@ -50,14 +50,14 @@ async function run(targetUser, level, guild, client, executor, replyFn, ephemera
       .setDescription(`<@${targetUser.id}> has been promoted to **Level ${level}**.`)
       .setTimestamp());
   } catch (err) {
-    console.error('[totpromote error]', err);
-    await ephemeralFn('Error running totpromote. Check bot permissions and role hierarchy.');
+    console.error('[sotpromote error]', err);
+    await ephemeralFn('Error running sotpromote. Check bot permissions and role hierarchy.');
   }
 }
 
 export default {
   data: new SlashCommandBuilder()
-    .setName('totpromote')
+    .setName('sotpromote')
     .setDescription('Promote a user to a Shock on Trial level')
     .addUserOption(opt => opt.setName('user').setDescription('User').setRequired(true))
     .addIntegerOption(opt => opt.setName('level').setDescription('Level (1, 2, or 3)').setRequired(true)
@@ -78,7 +78,7 @@ export default {
     const member = await message.guild.members.fetch(message.author.id);
     if (!hasPermission(member)) return message.reply('You do not have permission to use this command.');
     const mention = args[0]; const level = parseInt(args[1]);
-    if (!mention || isNaN(level) || ![1,2,3].includes(level)) return message.reply('Usage: `-totpromote @user <1|2|3>`');
+    if (!mention || isNaN(level) || ![1,2,3].includes(level)) return message.reply('Usage: `-sotpromote @user <1|2|3>`');
     const userId = mention.replace(/[<@!>]/g, '');
     let targetUser;
     try { targetUser = await message.client.users.fetch(userId); } catch { return message.reply('Could not find that user.'); }
