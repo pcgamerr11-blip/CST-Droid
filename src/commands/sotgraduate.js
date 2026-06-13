@@ -21,7 +21,7 @@ async function sendLog(guild, executor, target) {
     await channel.send({ embeds: [
       new EmbedBuilder()
         .setColor(0x57F287)
-        .setTitle('📋 Command Log — totgraduate')
+        .setTitle('📋 Command Log — sotgraduate')
         .addFields(
           { name: 'Executor', value: `<@${executor.id}> (${executor.tag})`, inline: true },
           { name: 'Target', value: `<@${target.id}> (${target.tag})`, inline: true },
@@ -31,7 +31,7 @@ async function sendLog(guild, executor, target) {
         .setTimestamp()
     ]});
   } catch (err) {
-    console.error('[totgraduate log error]', err);
+    console.error('[sotgraduate log error]', err);
   }
 }
 
@@ -49,14 +49,14 @@ async function run(targetUser, guild, client, executor, replyFn, ephemeralFn) {
       .setDescription(`<@${targetUser.id}> has successfully **graduated** from Shock on Trial!`)
       .setTimestamp());
   } catch (err) {
-    console.error('[totgraduate error]', err);
-    await ephemeralFn('Error running totgraduate. Check bot permissions and role hierarchy.');
+    console.error('[sotgraduate error]', err);
+    await ephemeralFn('Error running sotgraduate. Check bot permissions and role hierarchy.');
   }
 }
 
 export default {
   data: new SlashCommandBuilder()
-    .setName('totgraduate')
+    .setName('sotgraduate')
     .setDescription('Graduate a user from Shock on Trial')
     .addUserOption(opt => opt.setName('user').setDescription('User').setRequired(true)),
 
@@ -74,7 +74,7 @@ export default {
     const member = await message.guild.members.fetch(message.author.id);
     if (!hasPermission(member)) return message.reply('You do not have permission to use this command.');
     const mention = args[0];
-    if (!mention) return message.reply('Usage: `-totgraduate @user`');
+    if (!mention) return message.reply('Usage: `-sotgraduate @user`');
     const userId = mention.replace(/[<@!>]/g, '');
     let targetUser;
     try { targetUser = await message.client.users.fetch(userId); } catch { return message.reply('Could not find that user.'); }
