@@ -20,7 +20,7 @@ async function sendLog(guild, executor, target) {
     await channel.send({ embeds: [
       new EmbedBuilder()
         .setColor(0xED4245)
-        .setTitle('📋 Command Log — totend')
+        .setTitle('📋 Command Log — sotend')
         .addFields(
           { name: 'Executor', value: `<@${executor.id}> (${executor.tag})`, inline: true },
           { name: 'Target', value: `<@${target.id}> (${target.tag})`, inline: true },
@@ -30,7 +30,7 @@ async function sendLog(guild, executor, target) {
         .setTimestamp()
     ]});
   } catch (err) {
-    console.error('[totend log error]', err);
+    console.error('[sotend log error]', err);
   }
 }
 
@@ -45,14 +45,14 @@ async function run(targetUser, guild, client, executor, replyFn, ephemeralFn) {
       .setDescription(`<@${targetUser.id}>'s Shock on Trial has been **ended** and all trial roles removed.`)
       .setTimestamp());
   } catch (err) {
-    console.error('[totend error]', err);
-    await ephemeralFn('Error running totend. Check bot permissions and role hierarchy.');
+    console.error('[sotend error]', err);
+    await ephemeralFn('Error running sotend. Check bot permissions and role hierarchy.');
   }
 }
 
 export default {
   data: new SlashCommandBuilder()
-    .setName('totend')
+    .setName('sotend')
     .setDescription("End a user's Shock on Trial")
     .addUserOption(opt => opt.setName('user').setDescription('User').setRequired(true)),
 
@@ -70,7 +70,7 @@ export default {
     const member = await message.guild.members.fetch(message.author.id);
     if (!hasPermission(member)) return message.reply('You do not have permission to use this command.');
     const mention = args[0];
-    if (!mention) return message.reply('Usage: `-totend @user`');
+    if (!mention) return message.reply('Usage: `-sotend @user`');
     const userId = mention.replace(/[<@!>]/g, '');
     let targetUser;
     try { targetUser = await message.client.users.fetch(userId); } catch { return message.reply('Could not find that user.'); }
