@@ -19,7 +19,7 @@ async function sendLog(guild, executor, target, daysAdded, newRemaining) {
     await channel.send({ embeds: [
       new EmbedBuilder()
         .setColor(0xFEE75C)
-        .setTitle('📋 Command Log — totextend')
+        .setTitle('📋 Command Log — sotextend')
         .addFields(
           { name: 'Executor', value: `<@${executor.id}> (${executor.tag})`, inline: true },
           { name: 'Target', value: `<@${target.id}> (${target.tag})`, inline: true },
@@ -30,7 +30,7 @@ async function sendLog(guild, executor, target, daysAdded, newRemaining) {
         .setTimestamp()
     ]});
   } catch (err) {
-    console.error('[totextend log error]', err);
+    console.error('[sotextend log error]', err);
   }
 }
 
@@ -56,7 +56,7 @@ async function run(targetUser, days, guild, client, executor, replyFn, ephemeral
 
 export default {
   data: new SlashCommandBuilder()
-    .setName('totextend')
+    .setName('sotextend')
     .setDescription("Extend a user's Shock on Trial time")
     .addUserOption(opt => opt.setName('user').setDescription('User').setRequired(true))
     .addIntegerOption(opt => opt.setName('days').setDescription('Days to add').setRequired(true).setMinValue(1)),
@@ -76,7 +76,7 @@ export default {
     const member = await message.guild.members.fetch(message.author.id);
     if (!hasPermission(member)) return message.reply('You do not have permission to use this command.');
     const mention = args[0]; const days = parseInt(args[1]);
-    if (!mention || isNaN(days) || days < 1) return message.reply('Usage: `-totextend @user <days>`');
+    if (!mention || isNaN(days) || days < 1) return message.reply('Usage: `-sotextend @user <days>`');
     const userId = mention.replace(/[<@!>]/g, '');
     let targetUser;
     try { targetUser = await message.client.users.fetch(userId); } catch { return message.reply('Could not find that user.'); }
