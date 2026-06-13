@@ -13,7 +13,7 @@ async function sendLog(guild, executor, target, result) {
     await channel.send({ embeds: [
       new EmbedBuilder()
         .setColor(0xFEE75C)
-        .setTitle('📋 Command Log — tottime')
+        .setTitle('📋 Command Log — sottime')
         .addFields(
           { name: 'Executor', value: `<@${executor.id}> (${executor.tag})`, inline: true },
           { name: 'Target', value: `<@${target.id}> (${target.tag})`, inline: true },
@@ -23,7 +23,7 @@ async function sendLog(guild, executor, target, result) {
         .setTimestamp()
     ]});
   } catch (err) {
-    console.error('[tottime log error]', err);
+    console.error('[sottime log error]', err);
   }
 }
 
@@ -54,7 +54,7 @@ async function run(targetUser, guild, client, executor, replyFn, ephemeralFn) {
 
 export default {
   data: new SlashCommandBuilder()
-    .setName('tottime')
+    .setName('sottime')
     .setDescription('Check how much time a user has left on Shock on Trial')
     .addUserOption(opt => opt.setName('user').setDescription('User').setRequired(true)),
 
@@ -68,7 +68,7 @@ export default {
 
   async prefixExecute(message, args) {
     const mention = args[0];
-    if (!mention) return message.reply('Usage: `-tottime @user`');
+    if (!mention) return message.reply('Usage: `-sottime @user`');
     const userId = mention.replace(/[<@!>]/g, '');
     let targetUser;
     try { targetUser = await message.client.users.fetch(userId); } catch { return message.reply('Could not find that user.'); }
