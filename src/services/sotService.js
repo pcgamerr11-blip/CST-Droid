@@ -79,7 +79,7 @@ async function handleExpiredTrial(client, guild, userId, trialData) {
       .setTimestamp();
 
     const kickButton = new ButtonBuilder()
-      .setCustomId(`sot_kick_${userId}`)
+      .setCustomId(`sot_kick:${userId}`)
       .setLabel('Kick User')
       .setStyle(ButtonStyle.Danger)
       .setEmoji('👢');
