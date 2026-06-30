@@ -4,12 +4,12 @@ import { logger } from '../utils/logger.js';
 const ALLOWED_KICK_ROLE_ID = '1411740361113735400';
 
 export default {
-  customId: 'sot_kick',
+  name: 'sot_kick',
 
   async execute(interaction, client, args) {
     try {
-      // customId format: sot_kick_<userId>
-      const userId = interaction.customId.replace('sot_kick_', '');
+      // customId format: sot_kick:<userId> — userId comes through as args[0]
+      const userId = args[0];
 
       const member = interaction.member;
       const hasPermission =
